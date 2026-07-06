@@ -6,6 +6,10 @@ import HowItWorks from './components/HowItWorks.jsx'
 import Principles from './components/Principles.jsx'
 import { checkContent, TrustCheckApiError } from './api/client.js'
 
+// Set this to your real repository URL after creating it on GitHub -
+// e.g. 'https://github.com/YOUR-USERNAME/trustcheck'
+const GITHUB_REPO_URL = 'https://github.com/YOUR-USERNAME/trustcheck'
+
 export default function App() {
   const [result, setResult] = useState(null)
   const [isChecking, setIsChecking] = useState(false)
@@ -35,7 +39,7 @@ export default function App() {
         <span className="site-header__mark">TrustCheck</span>
         <a
           className="site-header__github"
-          href="https://github.com/"
+          href={GITHUB_REPO_URL}
           target="_blank"
           rel="noreferrer"
         >

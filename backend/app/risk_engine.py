@@ -91,8 +91,12 @@ SIGNALS: Tuple[Signal, ...] = (
     Signal(
         id="too_good_offer",
         pattern=re.compile(
+            # NOTE: the quantifier between the amount and day/week is
+            # deliberately bounded ({0,40}) - an unbounded .* here was
+            # flagged in a security review as an ~80x CPU amplification
+            # on crafted 5000-char inputs. Keep it bounded.
             r"\b(guaranteed income|no experience (needed|required)|"
-            r"earn\s+£?\$?\d+.*(day|week)|risk[-\s]?free|easy money)\b",
+            r"earn\s+£?\$?\d+[^\n]{0,40}?(day|week)|risk[-\s]?free|easy money)\b",
             re.IGNORECASE,
         ),
         weight=2,

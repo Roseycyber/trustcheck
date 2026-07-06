@@ -25,15 +25,20 @@ from .domain import Category, SafeVerifyEntry, SafeVerifyInfo
 # bank's official site). Real deployment should source this from a
 # maintained, versioned dataset rather than a hardcoded dict - flagged
 # in docs/ARCHITECTURE.md.
+# Every entry MUST carry a last_verified date (enforced by a test).
+# If an entry's date is older than the staleness window, re-check it
+# against the bank's own published page before shipping - a wrong or
+# stale phone number in a product whose entire job is routing people to
+# the *right* number is the worst data-integrity failure this app can have.
 UK_BANK_DIRECTORY: Dict[str, Dict[str, str]] = {
-    "barclays": {"name": "Barclays", "website": "barclays.co.uk", "phone": "0345 734 5345"},
-    "hsbc": {"name": "HSBC", "website": "hsbc.co.uk", "phone": "03457 404 404"},
-    "lloyds": {"name": "Lloyds Bank", "website": "lloydsbank.com", "phone": "0345 300 0000"},
-    "natwest": {"name": "NatWest", "website": "natwest.com", "phone": "03457 888 444"},
-    "santander": {"name": "Santander UK", "website": "santander.co.uk", "phone": "0800 9127 500"},
-    "monzo": {"name": "Monzo", "website": "monzo.com", "phone": "In-app chat (see monzo.com)"},
-    "revolut": {"name": "Revolut", "website": "revolut.com", "phone": "In-app chat (see revolut.com)"},
-    "nationwide": {"name": "Nationwide", "website": "nationwide.co.uk", "phone": "03457 30 20 11"},
+    "barclays": {"name": "Barclays", "website": "barclays.co.uk", "phone": "0345 734 5345", "last_verified": "UNVERIFIED"},
+    "hsbc": {"name": "HSBC", "website": "hsbc.co.uk", "phone": "03457 404 404", "last_verified": "UNVERIFIED"},
+    "lloyds": {"name": "Lloyds Bank", "website": "lloydsbank.com", "phone": "0345 300 0000", "last_verified": "UNVERIFIED"},
+    "natwest": {"name": "NatWest", "website": "natwest.com", "phone": "03457 888 444", "last_verified": "UNVERIFIED"},
+    "santander": {"name": "Santander UK", "website": "santander.co.uk", "phone": "0800 9127 500", "last_verified": "UNVERIFIED"},
+    "monzo": {"name": "Monzo", "website": "monzo.com", "phone": "In-app chat (see monzo.com)", "last_verified": "UNVERIFIED"},
+    "revolut": {"name": "Revolut", "website": "revolut.com", "phone": "In-app chat (see revolut.com)", "last_verified": "UNVERIFIED"},
+    "nationwide": {"name": "Nationwide", "website": "nationwide.co.uk", "phone": "03457 30 20 11", "last_verified": "UNVERIFIED"},
 }
 
 _NEVER_CONFIRMS = "TrustCheck never confirms a message is genuine, whichever channel you check."
@@ -62,8 +67,15 @@ def _bank_guidance(content: str) -> SafeVerifyInfo:
                 SafeVerifyEntry(label="Official phone", value=bank["phone"]),
             ],
             disclaimer=(
-                "These details come from the bank's own public sources. "
-                f"Providing them does not confirm the message is genuine. {_NEVER_CONFIRMS}"
+                "These details come from the bank's own public sources"
+                + (
+                    ", but have not been re-verified recently - cross-check "
+                    "them on the bank's official website before calling"
+                    if bank.get("last_verified") == "UNVERIFIED"
+                    else f" (last verified {bank.get('last_verified')})"
+                )
+                + ". Providing them does not confirm the message is genuine. "
+                + _NEVER_CONFIRMS
             ),
         )
     return SafeVerifyInfo(

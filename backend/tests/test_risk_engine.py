@@ -70,6 +70,30 @@ class TestRiskEngine(unittest.TestCase):
         self.assertEqual(verdict, Verdict.VERIFY)
         self.assertEqual(len(reasons), 1)
 
+    def test_no_signal_uses_unbounded_dot_star(self):
+        # Regression guard for a security-review finding: an unbounded
+        # .* caused ~80x CPU amplification on crafted inputs. All
+        # quantifiers over arbitrary text must be bounded.
+        from app.risk_engine import SIGNALS
+
+        for signal in SIGNALS:
+            self.assertNotIn(
+                ".*",
+                signal.pattern.pattern,
+                f"signal '{signal.id}' contains an unbounded .* quantifier",
+            )
+
+    def test_pathological_input_completes_fast(self):
+        import time
+
+        pathological = ("earn £9 " * 500)[:5000]
+        start = time.perf_counter()
+        assess_content(pathological, Category.JOB)
+        elapsed = time.perf_counter() - start
+        self.assertLess(
+            elapsed, 0.05, f"assessment took {elapsed*1000:.1f}ms on crafted input"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

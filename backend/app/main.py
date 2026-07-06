@@ -7,11 +7,15 @@ modules so it can be unit tested directly. This file's job is request
 validation and JSON shaping only.
 """
 
+import os
+import time
+from collections import defaultdict, deque
 from dataclasses import asdict
-from typing import List, Optional
+from typing import Deque, Dict, List, Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from .domain import Category
@@ -29,14 +33,53 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Permissive CORS for local development against the Vite dev server.
-# Tighten this to explicit origins before any real deployment.
+# CORS: driven by TRUSTCHECK_ALLOWED_ORIGINS (comma-separated). The
+# default "*" is for local development only - set explicit origins in
+# any real deployment. Kept out of code so tightening it doesn't need
+# a code change.
+_allowed_origins = [
+    origin.strip()
+    for origin in os.environ.get("TRUSTCHECK_ALLOWED_ORIGINS", "*").split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_allowed_origins,
+    allow_methods=["POST", "GET"],
+    allow_headers=["Content-Type"],
 )
+
+# Rate limiting: simple in-memory sliding window per client IP.
+# Deliberately dependency-free and honest about its limits: it protects
+# a single process against casual abuse (added after a security review
+# noted an unauthenticated, CPU-doing endpoint with no limiter). It is
+# NOT sufficient for multi-worker or multi-instance deployments - use a
+# shared store (e.g. Redis) or an upstream gateway limiter for that.
+RATE_LIMIT_REQUESTS = int(os.environ.get("TRUSTCHECK_RATE_LIMIT", "30"))
+RATE_LIMIT_WINDOW_SECONDS = 60
+_request_log: Dict[str, Deque[float]] = defaultdict(deque)
+
+
+@app.middleware("http")
+async def rate_limit_check_endpoint(request: Request, call_next):
+    if request.url.path == "/api/check":
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.monotonic()
+        window = _request_log[client_ip]
+        while window and now - window[0] > RATE_LIMIT_WINDOW_SECONDS:
+            window.popleft()
+        if len(window) >= RATE_LIMIT_REQUESTS:
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "detail": (
+                        "Too many checks in a short time - please wait a "
+                        "minute and try again."
+                    )
+                },
+            )
+        window.append(now)
+    return await call_next(request)
 
 
 class CheckRequestBody(BaseModel):

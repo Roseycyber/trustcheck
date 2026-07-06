@@ -36,6 +36,22 @@ class TestSafeVerify(unittest.TestCase):
         info = build_safe_verify("Some random link", Category.OTHER)
         self.assertTrue(info.instructions)
 
+    def test_every_bank_entry_has_a_verification_status(self):
+        # Data-integrity rule from the security review: a wrong or stale
+        # phone number is the worst failure this product can have, so
+        # every entry must carry an explicit verification status.
+        from app.safe_verify import UK_BANK_DIRECTORY
+
+        for key, entry in UK_BANK_DIRECTORY.items():
+            self.assertIn("last_verified", entry, f"'{key}' is missing last_verified")
+
+    def test_unverified_bank_details_say_so_in_the_disclaimer(self):
+        from app.safe_verify import UK_BANK_DIRECTORY
+
+        if any(e.get("last_verified") == "UNVERIFIED" for e in UK_BANK_DIRECTORY.values()):
+            info = build_safe_verify("A message from Barclays", Category.BANK)
+            self.assertIn("not been re-verified", info.disclaimer)
+
 
 if __name__ == "__main__":
     unittest.main()
