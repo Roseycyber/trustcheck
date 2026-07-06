@@ -1,0 +1,20 @@
+import Stamp from './Stamp.jsx'
+
+export default function VerdictCard({ verdictLabel, verdict, reasons }) {
+  return (
+    <div className={`verdict-card verdict-card--${verdict}`}>
+      <div className="verdict-card__stamp">
+        <Stamp variant={verdict} />
+      </div>
+      <div className="verdict-card__body">
+        <p className="verdict-card__eyebrow">TrustCheck's read</p>
+        <h2 className="verdict-card__label">{verdictLabel}</h2>
+        <ul className="verdict-card__reasons">
+          {reasons.map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
