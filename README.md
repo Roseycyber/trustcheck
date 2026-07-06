@@ -1,5 +1,9 @@
 # TrustCheck
 
+[![CI](https://github.com/YOUR-USERNAME/trustcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR-USERNAME/trustcheck/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](backend/requirements.txt)
+
 **Check before you trust.**
 
 TrustCheck gives you a cautious second opinion on a job offer, a bank
@@ -143,6 +147,16 @@ contribution).
 
 See `CONTRIBUTING.md`. Contributions that touch anything in
 `docs/SAFETY_PRINCIPLES.md` get extra scrutiny, on purpose.
+
+## About this project
+
+TrustCheck is designed, built, and maintained by its founder as the
+reference implementation of a UK consumer trust product. The design
+principles behind it - conservative verdicts, official-source routing,
+explainability over scores - are documented in
+`docs/SAFETY_PRINCIPLES.md` and enforced by the test suite, not just
+stated. Issues and contributions are welcome; see `CONTRIBUTING.md`
+and `SECURITY.md`.
 
 ## License
 

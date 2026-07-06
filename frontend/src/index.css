@@ -515,3 +515,10 @@ button {
     width: 96px;
   }
 }
+
+/* Closes an audit finding: this class was used in VerdictCard.jsx with
+   no matching rule. min-width: 0 lets the text column shrink properly
+   inside the grid instead of overflowing on narrow screens. */
+.verdict-card__body {
+  min-width: 0;
+}
