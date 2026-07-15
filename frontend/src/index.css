@@ -4,12 +4,12 @@
   --color-surface-alt: #e4e7de;
   --color-ink: #1c2333;
   --color-ink-soft: #4b5566;
-  --color-ink-faint: #7b8494;
+  --color-ink-faint: #5b6474;
   --color-border: #d3d6c9;
 
   --color-verify: #2f6f62;
   --color-verify-bg: #e4eeea;
-  --color-suspicious: #c97a2b;
+  --color-suspicious: #9a5200;
   --color-suspicious-bg: #f7e9d8;
   --color-high-risk: #a6402f;
   --color-high-risk-bg: #f3e1dc;
@@ -515,6 +515,22 @@ button {
     width: 96px;
   }
 }
+
+/* ---------- Screen-reader only ---------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ---------- Closes an audit finding ---------- */
 
 /* Closes an audit finding: this class was used in VerdictCard.jsx with
    no matching rule. min-width: 0 lets the text column shrink properly

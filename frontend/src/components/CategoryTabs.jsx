@@ -6,9 +6,9 @@ const CATEGORIES = [
   { value: 'other', label: 'Other' },
 ]
 
-export default function CategoryTabs({ value, onChange }) {
+export default function CategoryTabs({ value, onChange, ...rest }) {
   return (
-    <div className="category-tabs" role="radiogroup" aria-label="What is this about?">
+    <div className="category-tabs" role="radiogroup" aria-label="What is this about?" {...rest}>
       {CATEGORIES.map((category) => {
         const isActive = category.value === value
         return (

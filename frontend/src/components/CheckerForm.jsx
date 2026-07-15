@@ -18,11 +18,11 @@ export default function CheckerForm({ onSubmit, isChecking }) {
   }
 
   return (
-    <form className="checker-form" onSubmit={handleSubmit}>
-      <label className="checker-form__label" htmlFor="content">
+    <form className="checker-form" onSubmit={handleSubmit} aria-label="Message checker">
+      <span className="checker-form__label" id="category-label">
         What is this about?
-      </label>
-      <CategoryTabs value={category} onChange={setCategory} />
+      </span>
+      <CategoryTabs value={category} onChange={setCategory} aria-labelledby="category-label" />
 
       <label className="checker-form__label checker-form__label--textarea" htmlFor="content">
         Paste it below
@@ -35,19 +35,24 @@ export default function CheckerForm({ onSubmit, isChecking }) {
         onChange={(event) => setContent(event.target.value)}
         rows={7}
         maxLength={5000}
+        aria-describedby="hint-text"
       />
 
       <div className="checker-form__footer">
-        <span className="checker-form__hint">
+        <span className="checker-form__hint" id="hint-text">
           TrustCheck never says something is "safe" - only how risky it looks, and how to check it yourself.
         </span>
         <button
           type="submit"
           className="checker-form__submit"
           disabled={!content.trim() || isChecking}
+          aria-busy={isChecking}
         >
           {isChecking ? 'Checking…' : 'Check this'}
         </button>
+      </div>
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {isChecking ? 'Checking message. Please wait.' : ''}
       </div>
     </form>
   )

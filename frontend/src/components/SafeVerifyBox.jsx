@@ -2,7 +2,7 @@ export default function SafeVerifyBox({ safeVerify }) {
   if (!safeVerify) return null
 
   return (
-    <div className="safe-verify">
+    <div className="safe-verify" aria-live="polite" aria-atomic="true">
       <h3 className="safe-verify__heading">{safeVerify.heading}</h3>
       <p className="safe-verify__instructions">{safeVerify.instructions}</p>
 
