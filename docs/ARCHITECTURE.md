@@ -48,7 +48,7 @@ project for anything beyond a demo.
 | Category | Current state | Real integration point |
 |---|---|---|
 | Bank | Static dict of major UK banks' public contact info, in `safe_verify.py::UK_BANK_DIRECTORY` | Move to a maintained, versioned data source; ideally cross-checked periodically against banks' own published pages |
-| Job / employer | Stub - links to the Companies House search UI, does not call the API | [Companies House public API](https://developer.company-information.service.gov.uk/) - register for an API key, add a client in a new `companies_house.py`, call it from `safe_verify.py::_job_guidance` |
+| Job / employer | **Live** - calls the [Companies House public API](https://developer.company-information.service.gov.uk/) from `companies_house.py`, wired into `safe_verify.py::_job_guidance`. Falls back to general guidance when the API key is not set or the API is unreachable. | N/A - live integration complete |
 | Healthcare | Static NHS URLs (`nhs.uk`, `nhs.uk/find-a-gp`, `111.nhs.uk`) | These are stable enough to leave static; consider the [NHS API developer hub](https://digital.nhs.uk/developer) if a live directory lookup is ever needed |
 | Brand / advert | Generic guidance only, no directory | Would need a source of truth for "official domains per brand," which doesn't have an obvious authoritative UK public API - likely a manually curated, versioned list to start |
 
