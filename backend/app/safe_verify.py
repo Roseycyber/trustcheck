@@ -30,15 +30,27 @@ from .domain import Category, SafeVerifyEntry, SafeVerifyInfo
 # against the bank's own published page before shipping - a wrong or
 # stale phone number in a product whose entire job is routing people to
 # the *right* number is the worst data-integrity failure this app can have.
+#
+# 2026-07-15 audit: every website + phone below was checked against the
+# bank's OWN published page (not a third-party list) on this date.
+#   - Santander: previous number 0800 9127 500 did not match any number
+#     Santander publishes; corrected to 0330 9 123 123 (santander.co.uk
+#     telephone-banking + legal pages).
+#   - Monzo: upgraded from "in-app chat" to the freephone Monzo itself
+#     publishes (monzo.com/help/app-help/contacting-support); Monzo still
+#     directs customers to in-app chat first.
+#   - Revolut: left as in-app chat only. Revolut publishes no UK support
+#     phone line and states it will never call you about your account, so
+#     listing a "number" here would be misleading and unsafe.
 UK_BANK_DIRECTORY: Dict[str, Dict[str, str]] = {
-    "barclays": {"name": "Barclays", "website": "barclays.co.uk", "phone": "0345 734 5345", "last_verified": "UNVERIFIED"},
-    "hsbc": {"name": "HSBC", "website": "hsbc.co.uk", "phone": "03457 404 404", "last_verified": "UNVERIFIED"},
-    "lloyds": {"name": "Lloyds Bank", "website": "lloydsbank.com", "phone": "0345 300 0000", "last_verified": "UNVERIFIED"},
-    "natwest": {"name": "NatWest", "website": "natwest.com", "phone": "03457 888 444", "last_verified": "UNVERIFIED"},
-    "santander": {"name": "Santander UK", "website": "santander.co.uk", "phone": "0800 9127 500", "last_verified": "UNVERIFIED"},
-    "monzo": {"name": "Monzo", "website": "monzo.com", "phone": "In-app chat (see monzo.com)", "last_verified": "UNVERIFIED"},
-    "revolut": {"name": "Revolut", "website": "revolut.com", "phone": "In-app chat (see revolut.com)", "last_verified": "UNVERIFIED"},
-    "nationwide": {"name": "Nationwide", "website": "nationwide.co.uk", "phone": "03457 30 20 11", "last_verified": "UNVERIFIED"},
+    "barclays": {"name": "Barclays", "website": "barclays.co.uk", "phone": "0345 734 5345", "last_verified": "2026-07-15"},
+    "hsbc": {"name": "HSBC", "website": "hsbc.co.uk", "phone": "03457 404 404", "last_verified": "2026-07-15"},
+    "lloyds": {"name": "Lloyds Bank", "website": "lloydsbank.com", "phone": "0345 300 0000", "last_verified": "2026-07-15"},
+    "natwest": {"name": "NatWest", "website": "natwest.com", "phone": "03457 888 444", "last_verified": "2026-07-15"},
+    "santander": {"name": "Santander UK", "website": "santander.co.uk", "phone": "0330 9 123 123", "last_verified": "2026-07-15"},
+    "monzo": {"name": "Monzo", "website": "monzo.com", "phone": "0800 088 4040 (in-app chat preferred)", "last_verified": "2026-07-15"},
+    "revolut": {"name": "Revolut", "website": "revolut.com", "phone": "In-app chat only (see revolut.com)", "last_verified": "2026-07-15"},
+    "nationwide": {"name": "Nationwide", "website": "nationwide.co.uk", "phone": "03457 30 20 11", "last_verified": "2026-07-15"},
 }
 
 _NEVER_CONFIRMS = "TrustCheck never confirms a message is genuine, whichever channel you check."
