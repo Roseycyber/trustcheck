@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Roseycyber/trustcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/Roseycyber/trustcheck/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](backend/requirements.txt)
+[![Python 3.12 | 3.13](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue.svg)](backend/requirements.txt)
 
 **Check before you trust.**
 
@@ -37,7 +37,10 @@ product:
   rule-based logic, fully unit tested, with zero external
   dependencies.
 - The **Safe Verify bank directory** uses real, publicly published
-  bank contact details as a working placeholder.
+  bank contact details as a working placeholder. Each entry carries a
+  `last_verified` date and is checked against the bank's own official
+  page; the static directory is still a stand-in for the live,
+  versioned data feed planned in `docs/ARCHITECTURE.md`.
 - The **Companies House and NHS lookups** are stubs with a documented
   integration point - see the table in `docs/ARCHITECTURE.md` - not
   live API calls yet.
@@ -47,19 +50,50 @@ product:
 Every mocked piece says so in its own disclaimer text in the app
 itself, not just in this README.
 
+## Requirements
+
+- **Python 3.12 or 3.13.** These are the supported versions and have
+  prebuilt wheels for all dependencies. Avoid pre-release/beta Python
+  (e.g. 3.15 betas): some dependencies don't yet publish wheels for
+  them, so `pip install` will try to compile from source and fail
+  unless you have a C/C++ and Rust toolchain installed.
+- **Node.js 18+** for the frontend.
+
 ## Quickstart
 
 ### Backend
 
 ```bash
 cd backend
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv
+```
+
+Then activate the virtual environment:
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+
+# Windows (Git Bash)
+source .venv/Scripts/activate
+
+# Windows (PowerShell)
+# .venv\Scripts\Activate.ps1
+```
+
+Install dependencies and run the API:
+
+```bash
 pip install -r requirements-dev.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
 The API is now at `http://localhost:8000` (interactive docs at
 `/docs`, courtesy of FastAPI).
+
+> **Windows note:** if `python3` isn't found, use `python` or the
+> launcher `py -3.12` / `py -3.13`. In Git Bash the activate script is
+> under `.venv/Scripts/`, not `.venv/bin/`.
 
 Run the tests:
 
