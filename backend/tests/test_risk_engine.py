@@ -65,6 +65,22 @@ class TestRiskEngine(unittest.TestCase):
             "too_good_offer should not fire outside JOB/BRAND categories",
         )
 
+    def test_secrecy_pressure_signal_fires(self):
+        content = "Keep this offer strictly confidential and don't tell anyone."
+        _, _, reasons = assess_content(content, Category.OTHER)
+        self.assertTrue(
+            any("secret" in reason.lower() for reason in reasons),
+            "expected the secrecy pressure reason to fire",
+        )
+
+    def test_secrecy_signal_is_scoped_to_pressure_to_keep_something_secret(self):
+        content = "The company treats customer payment records as confidential."
+        _, _, reasons = assess_content(content, Category.BRAND)
+        self.assertFalse(
+            any("secret" in reason.lower() for reason in reasons),
+            "secrecy signal should not fire for a neutral confidentiality notice",
+        )
+
     def test_empty_content_does_not_error(self):
         verdict, label, reasons = assess_content("", Category.OTHER)
         self.assertEqual(verdict, Verdict.VERIFY)
