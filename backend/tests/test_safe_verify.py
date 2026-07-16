@@ -19,6 +19,15 @@ class TestSafeVerify(unittest.TestCase):
         )
         self.assertTrue(any("barclays.co.uk" in e.value for e in info.entries))
 
+    def test_halifax_bank_is_detected(self):
+        info = build_safe_verify(
+            "Message from Halifax regarding your mortgage.", Category.BANK
+        )
+        self.assertTrue(any("halifax.co.uk" in e.value for e in info.entries))
+        self.assertTrue(
+            any("0345 603 4020" in e.value for e in info.entries)
+        )
+
     def test_unnamed_bank_falls_back_to_general_guidance(self):
         info = build_safe_verify("Your account needs attention.", Category.BANK)
         self.assertEqual(info.entries, [])

@@ -52,6 +52,7 @@ UK_BANK_DIRECTORY: Dict[str, Dict[str, str]] = {
     "monzo": {"name": "Monzo", "website": "monzo.com", "phone": "0800 088 4040 (in-app chat preferred)", "last_verified": "2026-07-15"},
     "revolut": {"name": "Revolut", "website": "revolut.com", "phone": "In-app chat only (see revolut.com)", "last_verified": "2026-07-15"},
     "nationwide": {"name": "Nationwide", "website": "nationwide.co.uk", "phone": "03457 30 20 11", "last_verified": "2026-07-15"},
+    "halifax": {"name": "Halifax", "website": "halifax.co.uk", "phone": "0345 603 4020", "last_verified": "2026-07-16"},
 }
 
 _NEVER_CONFIRMS = "TrustCheck never confirms a message is genuine, whichever channel you check."
