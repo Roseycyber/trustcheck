@@ -35,16 +35,18 @@ export default function CheckerForm({ onSubmit, isChecking }) {
         onChange={(event) => setContent(event.target.value)}
         rows={7}
         maxLength={5000}
+        aria-describedby="hint-text"
       />
 
       <div className="checker-form__footer">
-        <span className="checker-form__hint">
+        <span id="hint-text" className="checker-form__hint">
           TrustCheck never says something is "safe" - only how risky it looks, and how to check it yourself.
         </span>
         <button
           type="submit"
           className="checker-form__submit"
           disabled={!content.trim() || isChecking}
+          aria-busy={isChecking}
         >
           {isChecking ? 'Checking…' : 'Check this'}
         </button>
