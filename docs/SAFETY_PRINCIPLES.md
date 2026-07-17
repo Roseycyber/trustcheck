@@ -34,6 +34,14 @@ Anything not yet backed by a live data source says so in its own
 disclaimer (see the job-offer and default Safe Verify responses). A
 mocked lookup is never presented as if it were a verified result.
 
+As of this change, the Companies House lookup is LIVE
+(`backend/app/companies_house.py`). The NHS lookup remains a mocked
+stub. A live Companies House match never implies the message is genuine
+- it only confirms a company exists on the official register. The Safe
+Verify disclaimer states this explicitly; see `backend/app/safe_verify.py`
+(entries that append "the message or job offer is genuine - always verify
+through the official source").
+
 ## 5. A sensitive topic deserves a calm interface, not an alarming one
 
 No countdown timers, no red flashing, no "your account is at risk"

@@ -5,12 +5,13 @@ to check who a message claims to be from.
 IMPORTANT - current state of this module (read before using in
 production): the bank directory below is static, public contact info
 included as a working placeholder so the full product flow can be
-demonstrated end-to-end. The Companies House and NHS lookups are stubs
-with a clear integration point, not live calls. See
+demonstrated end-to-end. The Companies House lookup is now LIVE
+(see backend/app/companies_house.py); the NHS lookup is still a stub
+with a clear integration point, not a live call. See
 docs/ARCHITECTURE.md#safe-verify-data-sources for the plan to replace
-these with live, versioned data feeds. This module never fabricates a
-"verified" result - where TrustCheck can't confidently identify a
-sender, it says so and falls back to general guidance.
+remaining stubs with live, versioned data feeds. This module never
+fabricates a "verified" result - where TrustCheck can't confidently
+identify a sender, it says so and falls back to general guidance.
 
 This module has zero external dependencies so it can be unit tested
 without installing anything.
