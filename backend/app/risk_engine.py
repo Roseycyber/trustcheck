@@ -66,6 +66,19 @@ SIGNALS: Tuple[Signal, ...] = (
         reason="Asks for an upfront payment or fee",
     ),
     Signal(
+        id="secrecy_pressure",
+        pattern=re.compile(
+            r"\b(?:keep|treat)\s+(?:this|the\s+(?:offer|payment|"
+            r"conversation|message))\s+(?:strictly\s+)?"
+            r"(?:confidential|secret)\b|"
+            r"\b(?:don't|do\s+not)\s+(?:tell|share|discuss)\s+"
+            r"(?:anyone|anybody|others)\b",
+            re.IGNORECASE,
+        ),
+        weight=2,
+        reason="Pressures you to keep the message or transaction secret",
+    ),
+    Signal(
         id="sensitive_info_request",
         pattern=re.compile(
             r"\b(bank details|sort code|card number|cvv|security code|"
