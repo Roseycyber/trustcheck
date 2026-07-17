@@ -122,6 +122,19 @@ SIGNALS: Tuple[Signal, ...] = (
         weight=2,
         reason="Uses a shortened or unofficial-looking link",
     ),
+    Signal(
+        id="phishing_prompt",
+        pattern=re.compile(
+            r"\b(verify\s+(your\s+)?(account|identity|login|details)|"
+            r"confirm\s+(your\s+)?(account|identity|details|information)|"
+            r"update\s+(your\s+)?(account|payment|billing|details)|"
+            r"restore\s+(your\s+)?(account|access)|"
+            r"account\s+(verification|confirmation)\s+(required|needed))\b",
+            re.IGNORECASE,
+        ),
+        weight=2,
+        reason="Asks you to verify, confirm, or update account details \u2014 a common phishing tactic",
+    ),
 )
 
 

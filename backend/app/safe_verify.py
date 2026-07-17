@@ -5,19 +5,21 @@ to check who a message claims to be from.
 IMPORTANT - current state of this module (read before using in
 production): the bank directory below is static, public contact info
 included as a working placeholder so the full product flow can be
-demonstrated end-to-end. The Companies House and NHS lookups are stubs
-with a clear integration point, not live calls. See
+demonstrated end-to-end. The Companies House lookup is now LIVE
+(see backend/app/companies_house.py); the NHS lookup is still a stub
+with a clear integration point, not a live call. See
 docs/ARCHITECTURE.md#safe-verify-data-sources for the plan to replace
-these with live, versioned data feeds. This module never fabricates a
-"verified" result - where TrustCheck can't confidently identify a
-sender, it says so and falls back to general guidance.
+remaining stubs with live, versioned data feeds. This module never
+fabricates a "verified" result - where TrustCheck can't confidently
+identify a sender, it says so and falls back to general guidance.
 
 This module has zero external dependencies so it can be unit tested
 without installing anything.
 """
 
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
+from .companies_house import search_company
 from .domain import Category, SafeVerifyEntry, SafeVerifyInfo
 
 # Placeholder directory of major UK banks' *own published* contact
@@ -51,6 +53,7 @@ UK_BANK_DIRECTORY: Dict[str, Dict[str, str]] = {
     "monzo": {"name": "Monzo", "website": "monzo.com", "phone": "0800 088 4040 (in-app chat preferred)", "last_verified": "2026-07-15"},
     "revolut": {"name": "Revolut", "website": "revolut.com", "phone": "In-app chat only (see revolut.com)", "last_verified": "2026-07-15"},
     "nationwide": {"name": "Nationwide", "website": "nationwide.co.uk", "phone": "03457 30 20 11", "last_verified": "2026-07-15"},
+    "halifax": {"name": "Halifax", "website": "halifax.co.uk", "phone": "0345 603 4020", "last_verified": "2026-07-16"},
 }
 
 _NEVER_CONFIRMS = "TrustCheck never confirms a message is genuine, whichever channel you check."
@@ -102,7 +105,45 @@ def _bank_guidance(content: str) -> SafeVerifyInfo:
     )
 
 
-def _job_guidance() -> SafeVerifyInfo:
+def _lookup_company(content: str) -> Optional[Dict[str, Any]]:
+    """Heuristically detect a company name in content and look it up."""
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped and stripped[0].isupper() and len(stripped) > 3:
+            try:
+                return search_company(stripped)
+            except Exception:
+                return None
+    return None
+
+
+def _job_guidance(content: str = "") -> SafeVerifyInfo:
+    company = _lookup_company(content) if content else None
+    if company:
+        return SafeVerifyInfo(
+            heading=f"How to verify a {company['company_name']} job offer safely",
+            instructions=(
+                "Legitimate employers do not ask for fees, bank details, or ID "
+                "documents before you've formally accepted a role. Look the "
+                "company up independently and check its careers page directly "
+                "rather than any link in the message."
+            ),
+            entries=[
+                SafeVerifyEntry(label="Registered company name", value=company["company_name"]),
+                SafeVerifyEntry(label="Company number", value=company["company_number"]),
+                SafeVerifyEntry(label="Registered address", value=company["address"]),
+                SafeVerifyEntry(
+                    label="UK company registry",
+                    value="find-and-update.company-information.service.gov.uk",
+                ),
+            ],
+            disclaimer=(
+                f"This information comes from Companies House (company number "
+                f"{company['company_number']}). Providing it does not confirm "
+                "the message or job offer is genuine - always verify through "
+                f"the company's own official website. {_NEVER_CONFIRMS}"
+            ),
+        )
     return SafeVerifyInfo(
         heading="How to verify a job offer safely",
         instructions=(
@@ -118,8 +159,9 @@ def _job_guidance() -> SafeVerifyInfo:
             ),
         ],
         disclaimer=(
-            "This version does not yet perform a live Companies House lookup - "
-            f"see docs/ARCHITECTURE.md for the integration point. {_NEVER_CONFIRMS}"
+            "TrustCheck could not find this company in the Companies House "
+            "register, or the live lookup was unavailable. Always verify "
+            f"independently. {_NEVER_CONFIRMS}"
         ),
     )
 
@@ -180,7 +222,7 @@ def build_safe_verify(content: str, category: Optional[Category]) -> SafeVerifyI
     if category == Category.BANK:
         return _bank_guidance(content)
     if category == Category.JOB:
-        return _job_guidance()
+        return _job_guidance(content)
     if category == Category.HEALTHCARE:
         return _healthcare_guidance()
     if category == Category.BRAND:

@@ -94,6 +94,31 @@ class TestRiskEngine(unittest.TestCase):
             elapsed, 0.05, f"assessment took {elapsed*1000:.1f}ms on crafted input"
         )
 
+    def test_phishing_prompt_signal_fires_on_verify_account(self):
+        content = (
+            "Your account has been compromised. "
+            "Please verify your account immediately to restore access."
+        )
+        verdict, _, reasons = assess_content(content, Category.BANK)
+        self.assertIn(verdict, {Verdict.SUSPICIOUS, Verdict.HIGH_RISK})
+        self.assertTrue(
+            any("phishing" in r.lower() for r in reasons),
+            "expected phishing_prompt reason to appear",
+        )
+
+    def test_phishing_prompt_signal_is_scoped(self):
+        # "verify" used in a non-phishing context should not trigger the signal.
+        content = (
+            "Please verify the shipping address I sent you "
+            "before dispatching the order."
+        )
+        _, _, reasons = assess_content(content, Category.BRAND)
+        self.assertFalse(
+            any("phishing" in r.lower() for r in reasons),
+            "phishing_prompt should not fire when 'verify' is used "
+            "in a non-account context",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

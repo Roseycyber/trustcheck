@@ -1,7 +1,15 @@
 import unittest
+from unittest.mock import patch
 
 from app.domain import Category
 from app.safe_verify import build_safe_verify
+
+MOCK_COMPANY = {
+    "company_name": "Acme Corp Ltd",
+    "company_number": "01234567",
+    "company_status": "active",
+    "address": "123 Main Street, London, EC1A 1AA",
+}
 
 
 class TestSafeVerify(unittest.TestCase):
@@ -10,6 +18,15 @@ class TestSafeVerify(unittest.TestCase):
             "This is a message from Barclays about your account.", Category.BANK
         )
         self.assertTrue(any("barclays.co.uk" in e.value for e in info.entries))
+
+    def test_halifax_bank_is_detected(self):
+        info = build_safe_verify(
+            "Message from Halifax regarding your mortgage.", Category.BANK
+        )
+        self.assertTrue(any("halifax.co.uk" in e.value for e in info.entries))
+        self.assertTrue(
+            any("0345 603 4020" in e.value for e in info.entries)
+        )
 
     def test_unnamed_bank_falls_back_to_general_guidance(self):
         info = build_safe_verify("Your account needs attention.", Category.BANK)
@@ -21,9 +38,28 @@ class TestSafeVerify(unittest.TestCase):
         values = [e.value for e in info.entries]
         self.assertIn("nhs.uk", values)
 
-    def test_job_flags_that_lookup_is_a_stub(self):
+    def test_job_falls_back_gracefully_when_no_api_key(self):
         info = build_safe_verify("We'd like to offer you a role.", Category.JOB)
-        self.assertIn("does not yet perform a live", info.disclaimer.lower())
+        self.assertIn("could not find this company", info.disclaimer.lower())
+
+    @patch("app.safe_verify.search_company", return_value=MOCK_COMPANY)
+    def test_job_live_lookup_happy_path(self, mock_search):
+        content = "Acme Corp Ltd\nWe'd like to offer you a role."
+        info = build_safe_verify(content, Category.JOB)
+        mock_search.assert_called_once_with("Acme Corp Ltd")
+        self.assertIn("Acme Corp Ltd", info.heading)
+        self.assertIn("01234567", info.disclaimer)
+        self.assertIn("Companies House", info.disclaimer)
+
+    @patch("app.safe_verify.search_company", return_value=None)
+    def test_job_live_lookup_no_match(self, mock_search):
+        info = build_safe_verify("FakeCompany", Category.JOB)
+        self.assertIn("could not find this company", info.disclaimer.lower())
+
+    @patch("app.safe_verify.search_company", side_effect=Exception("API down"))
+    def test_job_live_lookup_api_error(self, mock_search):
+        info = build_safe_verify("Acme Corp Ltd", Category.JOB)
+        self.assertIn("could not find this company", info.disclaimer.lower())
 
     def test_every_category_disclaimer_avoids_confirming_legitimacy(self):
         for category in Category:
