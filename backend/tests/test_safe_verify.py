@@ -45,6 +45,12 @@ class TestSafeVerify(unittest.TestCase):
         for key, entry in UK_BANK_DIRECTORY.items():
             self.assertIn("last_verified", entry, f"'{key}' is missing last_verified")
 
+    def test_halifax_bank_is_detected(self):
+        info = build_safe_verify(
+            "This is a message from Halifax about your account.", Category.BANK
+        )
+        self.assertTrue(any("halifax.co.uk" in e.value for e in info.entries))
+
     def test_unverified_bank_details_say_so_in_the_disclaimer(self):
         from app.safe_verify import UK_BANK_DIRECTORY
 
